@@ -107,7 +107,7 @@ class server extends handle{
             case('send_text'):
                 if(strlen($data->to)>0){
                     echo $data->to;
-                    self::send_to($data->to,$this->mtpack($data));
+                    //self::send_to($data->to,$this->mtpack($data));
                 }else{
                     self::send_all($this->mtpack($data));
                 }
@@ -115,7 +115,7 @@ class server extends handle{
                 self::log( "Action Send msg");
                 break;
             case('notification'):
-                echo "Notify";
+                //notification here
                 break;
             case('ready'):
                 self::log( "\"$data->user\" Ready To Perform..\n");
