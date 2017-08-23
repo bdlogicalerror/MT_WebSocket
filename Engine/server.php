@@ -106,8 +106,8 @@ class server extends handle{
         switch ($data->action){
             case('send_text'):
                 if(strlen($data->to)>0){
-                    echo $data->to;
-                    //self::send_to($data->to,$this->mtpack($data));
+                    self::send_to($data->to,$this->mtpack($data));
+                    self::send_to($data->user,$this->mtpack($data));
                 }else{
                     self::send_all($this->mtpack($data));
                 }
@@ -128,7 +128,6 @@ class server extends handle{
                     self::typing($data->user);
                 }
 
-                self::log( "\"$data->user\" Typing..\n");
                 break;
         }
     }

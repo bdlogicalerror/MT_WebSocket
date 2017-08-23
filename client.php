@@ -81,6 +81,10 @@
 
     </body>
     <script>
+        $('.online_usr').click(function(){
+           console.log('mk');
+            //$('#to').val(this.value());
+        });
         $('#msg').click(function(){
             text=$('#txt_snd').val();
             snd_to=$('#to').val();
@@ -133,9 +137,9 @@
 
         function add_msg(serv){
             if(serv.user==usr){
-                $('<br><div style="float: left"><b style="color: #d9534f">'+serv.user+'</b> Send : '+serv.message+'</div>').appendTo('#get_msg')
+                $('<br><div style="float: left"><b style="background-color: #d9534f;border-radius: 3px">'+serv.user+'</b> : '+serv.message+'</div>').appendTo('#get_msg')
             }else{
-                $('<br><div style="float: right"><b style="color: #777620">'+serv.user+'</b> Send : '+serv.message+'</div>').appendTo('#get_msg')
+                $('<br><div style="float: right"><b style="background-color: #777620;border-radius: 3px">'+serv.user+'</b> : '+serv.message+'</div>').appendTo('#get_msg')
             }
 
         }
@@ -144,7 +148,7 @@
             for(i=0;i<dat.users.length;i++) {
                 //console.log(dat.users[i]);
                 if($("#" + dat.users[i]).length == 0) {
-                    $('<li id="' + dat.users[i] + '" style="color: #38b800">' + dat.users[i] + '</li>').appendTo('#online');
+                    $('<br><a class="online_usr" id="' + dat.users[i] + '" style="color: #38b800">&#9757; ' + dat.users[i] + '</a>').appendTo('#online');
                 };
 
             }
