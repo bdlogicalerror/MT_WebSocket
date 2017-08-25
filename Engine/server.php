@@ -8,6 +8,7 @@
  */
 require_once('handle.php');
 class server extends handle{
+    public $status=false;
     protected $master;                    //main socket connection
     protected $null=NULL;
     protected $host;                     //server host
@@ -25,84 +26,90 @@ class server extends handle{
     }
 
     Public function run(){
-        global $sock;                  //Connected socket array
-        global $user;                  //connected username array
-        global $users;                 //Connected Clients connection
-        $users=array($this->master);
+        if($this->status==false){
+            $this->status=true;
+            global $users;                 //Connected Clients connection
+            $users=array($this->master);
 
 
-        while (true) {
-            $changed = $users;
-            if(socket_select($changed, $null, $null, 0, 0)!==FALSE){
+            while (true) {
+                $changed = $users;
+                if(socket_select($changed, $null, $null, 0, 0)!==FALSE){
 
-                if (in_array($this->master, $changed)) {
-                    $new_socket = socket_accept($this->master);
-                    $users[] = $new_socket;
-                    $data = socket_read($new_socket, 10240);
-                    if($this->doHandShake($data,$new_socket)){
+                    if (in_array($this->master, $changed)) {
+                        $new_socket = socket_accept($this->master);
+                        $users[] = $new_socket;
+                        $data = socket_read($new_socket, 10240);
+                        if($this->doHandShake($data,$new_socket)){
+                            self::log("Successfully Complete Handshake \n");
+                            self::ready_signal($new_socket);
+                        }else{
+                            self::log("Error To HandShake \n");
+                        }
+                        $found_socket = array_search($this->master, $changed);
+                        unset($changed[$found_socket]);
 
-                        self::log("Successfully Complete Handshake \n");
-                        self::ready_signal($new_socket);
-                    }else{
-                        self::log("Error To HandShake \n");
+                        // do things with the new user
+                        socket_getpeername($new_socket, $ip);
                     }
-                    $found_socket = array_search($this->master, $changed);
-                    unset($changed[$found_socket]);
 
-                    // do things with the new user
-                    socket_getpeername($new_socket, $ip);
+                }else{
+                    self::log("Error ot Select Socket \n");
                 }
 
-            }else{
-                self::log("Error ot Select Socket \n");
-            }
 
 
+                foreach ($changed as $changed_socket) {
 
-            foreach ($changed as $changed_socket) {
 
+                    //check for any incoming data
+                    while(socket_recv($changed_socket, $buffer, 10240, 0) >=0) {
+                        $data=$this->Unmtpack($buffer);
+                        //print_r($data);
+                        if($data==!false) {
+                            if ( $data->user !== NULL || $data->user !== '' ) {
+                                self::get_action($changed_socket,$data);
 
-                //check for any incoming data
-                while(socket_recv($changed_socket, $buffer, 10240, 0) >=0) {
-                    $data=$this->Unmtpack($buffer);
-                    //print_r($data);
-                    if($data==!false) {
-                        if ( $data->user !== NULL || $data->user !== '' ) {
-                            $sock[]= $changed_socket;
-                            $user[]= $data->user;
-                            self::get_action($data);
-                            break 2;
+                                break 2;
+                            }
+                            break;
+                        }else{
+                            global $user;
+                            global $sock;
+                            global $users;
+
+                            $dis_sock_num=array_keys($sock,$changed_socket)[0];
+
+                            $dis_sock=$sock[$dis_sock_num];             //Get Disconnect Client Socket ID
+
+                            socket_close($dis_sock);                    //Close Client Connection
+
+                            $dis_user=$user[$dis_sock_num];             //Get Disconnect User Name
+
+                            foreach ($users as $key=>$val){
+                                if($dis_sock==$val){
+                                    unset($users[$key]);
+                                }
+                            }
+
+                            unset($user[$dis_sock_num]);                //Remove user ID From User Array
+                            unset($sock[$dis_sock_num]);                //Remove Socket ID From User Array
+
+                            $this->log("Disconnect \"$dis_user\"". "\n");
+                            self::offline($dis_user);
+                            break;
                         }
-                        break;
-                    }else{
-                        $dis=self::disconnect($changed_socket);
-                        global $user;
-                        global $sock;
-
-
-                        $all=array_combine($user,$sock);
-                        $dis_user=$this->get_key($dis,$all);            //get username
-
-                        $this->log("Disconnect \"$dis_user\"". "\n");
-
-                        $rem_sock=$this->get_key($dis,$sock);
-                        unset($sock[$rem_sock]);
-                        $rem_usr=$this->get_key($dis_user,$user);
-                        unset($user[$rem_usr]);
-                        self::offline($dis_user);
-                        break;
                     }
                 }
             }
 
         }
-
     }
 
     protected function log($msg){
         echo date('h:i:s D-M-Y',time())." : ".$msg;
     }
-    private function get_action($data){
+    private function get_action($socket=null,$data){
         switch ($data->action){
             case('send_text'):
                 if(strlen($data->to)>0){
@@ -112,12 +119,16 @@ class server extends handle{
                     self::send_all($this->mtpack($data));
                 }
 
-                self::log( "Action Send msg");
+                self::log( "Action Send msg \n");
                 break;
             case('notification'):
                 //notification here
                 break;
             case('ready'):
+                global $user;
+                global $sock;
+                $user[]= $data->user;
+                $sock[]= $socket;
                 self::log( "\"$data->user\" Ready To Perform..\n");
                 self::chat_list();
                 break;
@@ -143,18 +154,6 @@ class server extends handle{
     }
 
 
-    private function disconnect($client){
-        global $users;
-        foreach ($users as $key=>$val){
-            if($client==$val){
-                $mk=$key;
-                break;
-            }
-        }
-        $un=$users[$mk];
-        unset($users[$mk]);
-        return $un;
-    }
     private function send_to($to,$message){
         global $user;
         global $sock;
@@ -212,6 +211,13 @@ class server extends handle{
         $pack=$this->mtpack($data);
         foreach ($users as $socket){
             @socket_write($socket,$pack,strlen($pack));
+        }
+    }
+
+    public function stop(){
+        if($this->status==true){
+            @socket_close($this->master);
+            $this->status=false;
         }
     }
 

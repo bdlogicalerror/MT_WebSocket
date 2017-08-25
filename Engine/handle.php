@@ -74,14 +74,5 @@ class handle
 
         return $header.$text;
     }
-    public function get_key($needle,$array){
-        foreach ($array as $key=>$val){
-            if($needle==$val){
-                return $key;
-                break;
-            }
-        }
-
-    }
 
 }

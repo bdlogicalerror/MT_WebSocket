@@ -4,8 +4,6 @@
         <script>
             var ws;
             var usr;
-
-//Document Function
             $(document).ready(function(){
 
                 var person = prompt("Please enter your name", "Munna");
@@ -27,11 +25,8 @@
 
                 ws.onopen = function(ev) {
                     console.log("connected");
-                }
+                };
 
-                if(ws.readyState==1){
-
-                }
 
                 ws.onerror = function(ev) {
                     console.log($ev.data) ;
