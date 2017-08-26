@@ -1,4 +1,4 @@
-<?php
+<?php namespace Engine;
 
 /**
  * Created for Amidex-IT.
@@ -6,7 +6,8 @@
  * Date: 8/13/2017
  * Time: 11:16 PM
  */
-require_once('handle.php');
+include ('handle.php');
+use Engine\handle as handle;
 class server extends handle{
     public $status=false;
     protected $master;                    //main socket connection

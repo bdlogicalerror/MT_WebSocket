@@ -1,4 +1,4 @@
-<?php
+<?php namespace Engine;
 /**
  * Created for Amidex IT.
  * User: Munna
