@@ -7,7 +7,7 @@
  * Time: 11:16 PM
  */
 include ('handle.php');
-use Engine\handle as handle;
+use engine\handle as handle;
 class server extends handle{
     public $status=false;
     protected $master;                    //main socket connection
@@ -108,9 +108,7 @@ class server extends handle{
     }
 
     protected function log($msg){
-        $data=date('h:i:s D-M-Y',time())." : ".$msg."\n";
-        echo $data;
-
+        echo date('h:i:s D-M-Y',time())." : ".$msg;
     }
     private function get_action($socket=null,$data){
         switch ($data->action){
@@ -210,10 +208,12 @@ class server extends handle{
         global $user;
         global $users;
         $online=[];
-        $data=['action'=>'offline','users'=>$of_user];
-        $pack=$this->mtpack($data);
-        foreach ($users as $socket){
-            @socket_write($socket,$pack,strlen($pack));
+        if(!in_array($of_user,$user)){
+            $data=['action'=>'offline','users'=>$of_user];
+            $pack=$this->mtpack($data);
+            foreach ($users as $socket){
+                @socket_write($socket,$pack,strlen($pack));
+            }
         }
     }
 
