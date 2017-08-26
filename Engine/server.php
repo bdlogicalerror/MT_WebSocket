@@ -107,7 +107,9 @@ class server extends handle{
     }
 
     protected function log($msg){
-        echo date('h:i:s D-M-Y',time())." : ".$msg;
+        $data=date('h:i:s D-M-Y',time())." : ".$msg."\n";
+        echo $data;
+
     }
     private function get_action($socket=null,$data){
         switch ($data->action){
