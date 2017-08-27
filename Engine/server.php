@@ -78,26 +78,27 @@ class server extends handle{
                             global $user;
                             global $sock;
                             global $users;
+                            if(count($users)>0){
+                                $dis_sock_num=array_keys($sock,$changed_socket)[0];
 
-                            $dis_sock_num=array_keys($sock,$changed_socket)[0];
+                                $dis_sock=$sock[$dis_sock_num];             //Get Disconnect Client Socket ID
 
-                            $dis_sock=$sock[$dis_sock_num];             //Get Disconnect Client Socket ID
+                                socket_close($dis_sock);                    //Close Client Connection
 
-                            socket_close($dis_sock);                    //Close Client Connection
+                                $dis_user=$user[$dis_sock_num];             //Get Disconnect User Name
 
-                            $dis_user=$user[$dis_sock_num];             //Get Disconnect User Name
-
-                            foreach ($users as $key=>$val){
-                                if($dis_sock==$val){
-                                    unset($users[$key]);
+                                foreach ($users as $key=>$val){
+                                    if($dis_sock==$val){
+                                        unset($users[$key]);
+                                    }
                                 }
+
+                                unset($user[$dis_sock_num]);                //Remove user ID From User Array
+                                unset($sock[$dis_sock_num]);                //Remove Socket ID From User Array
+
+                                $this->log("Disconnect \"$dis_user\"". "\n");
+                                self::offline($dis_user);
                             }
-
-                            unset($user[$dis_sock_num]);                //Remove user ID From User Array
-                            unset($sock[$dis_sock_num]);                //Remove Socket ID From User Array
-
-                            $this->log("Disconnect \"$dis_user\"". "\n");
-                            self::offline($dis_user);
                             break;
                         }
                     }
@@ -119,7 +120,6 @@ class server extends handle{
                 }else{
                     self::send_all($this->mtpack($data));
                 }
-
                 self::log( "Action Send msg \n");
                 break;
             case('notification'):
@@ -160,12 +160,15 @@ class server extends handle{
         global $sock;
         global $users;
         $all=array_combine($user,$sock);
-        $get_sock=$all[$to];
-        foreach ($users as $val){
-            if($val==$get_sock){
-
-                @socket_write($val,$message,strlen($message));
+        if(in_array($to,$user)){
+            $get_sock=$all[$to];
+            foreach ($users as $val){
+                if($val==$get_sock){
+                    @socket_write($val,$message,strlen($message));
+                }
             }
+        }else{
+            //offline user message
         }
     }
 
