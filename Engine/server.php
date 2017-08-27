@@ -61,8 +61,6 @@ class server extends handle{
 
 
                 foreach ($changed as $changed_socket) {
-
-
                     //check for any incoming data
                     while(socket_recv($changed_socket, $buffer, 10240, 0) >=0) {
                         $data=$this->Unmtpack($buffer);
@@ -78,7 +76,6 @@ class server extends handle{
                             global $user;
                             global $sock;
                             global $users;
-                            if(count($users)>0){
                                 $dis_sock_num=array_keys($sock,$changed_socket)[0];
 
                                 $dis_sock=$sock[$dis_sock_num];             //Get Disconnect Client Socket ID
@@ -98,7 +95,6 @@ class server extends handle{
 
                                 $this->log("Disconnect \"$dis_user\"". "\n");
                                 self::offline($dis_user);
-                            }
                             break;
                         }
                     }
