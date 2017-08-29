@@ -140,7 +140,11 @@ class server extends handle{
         }
     }
 
-    private function typing($from,$to=null){
+    /**
+     * @param $from
+     * @param null $to
+     */
+    private function typing($from, $to=null){
         $data=['action'=>'type','from'=>$from,'to'=>$to];
         if(isset($to)){
             self::send_to($to,$this->mtpack($data));
@@ -151,7 +155,11 @@ class server extends handle{
     }
 
 
-    private function send_to($to,$message){
+    /**
+     * @param $to
+     * @param $message
+     */
+    private function send_to($to, $message){
         global $user;
         global $sock;
         global $users;
@@ -169,6 +177,9 @@ class server extends handle{
     }
 
 
+    /**
+     * @param $message
+     */
     private function send_all($message){
         global $user;
         global $sock;
@@ -180,6 +191,9 @@ class server extends handle{
         }
     }
 
+    /**
+     * @param $socket
+     */
     protected function ready_signal($socket){
         $data=['action'=>'ready'];
         $packet=$this->mtpack($data);
@@ -187,6 +201,9 @@ class server extends handle{
     }
 
 
+    /**
+     *
+     */
     private function chat_list(){
         /*TODO: Add filter to show own friend*/
         global $user;
@@ -203,6 +220,9 @@ class server extends handle{
 
     }
 
+    /**
+     * @param $of_user
+     */
     private function offline($of_user){
         global $user;
         global $users;
@@ -216,6 +236,9 @@ class server extends handle{
         }
     }
 
+    /**
+     *
+     */
     public function stop(){
         if($this->status==true){
             @socket_close($this->master);

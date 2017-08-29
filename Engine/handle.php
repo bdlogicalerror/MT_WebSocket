@@ -8,6 +8,11 @@
 
 class handle
 {
+    /**
+     * @param $data
+     * @param $socket
+     * @return bool
+     */
     Public function doHandShake($data, $socket) {
         $headers = array();
         $lines = preg_split("/\r\n/", $data);
@@ -29,18 +34,30 @@ class handle
         return true;
     }
 
+    /**
+     * @param $text
+     * @return string
+     */
     Public function mtpack($text){
         if($text!==""){
             return $this->mask(json_encode($text));
         }
     }
 
+    /**
+     * @param $text
+     * @return mixed
+     */
     Public function Unmtpack($text){
         if($text!==''){
             return json_decode($this->unmask($text));
         }
     }
 
+    /**
+     * @param $text
+     * @return string
+     */
     protected function unmask($text) {
         $length = ord($text[1]) & 127;
         if($length == 126) {
@@ -61,6 +78,10 @@ class handle
         return $text;
     }
 
+    /**
+     * @param $text
+     * @return string
+     */
     protected function mask($text) {
         $b1 = 0x80 | (0x1 & 0x0f);
         $length = strlen($text);
