@@ -16,7 +16,7 @@
                 }
 
 
-                serverUrl=("ws://192.168.199.7:9000/socket/my/server.php");
+                serverUrl=("ws://127.0.0.1:9000/socket/my/server.php");
                if (window.MozWebSocket) {
                    ws = new MozWebSocket(serverUrl);
                } else if (window.WebSocket) {
