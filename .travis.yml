@@ -4,4 +4,4 @@ php:
 
 
 install:
-  - php -q server.php
+  
